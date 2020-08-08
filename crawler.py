@@ -1,6 +1,5 @@
 import pandas as pd
 import json
-import pprint
 import math
 from reppy.robots import Robots
 import re
@@ -9,8 +8,6 @@ import os
 
 from selenium.webdriver import Firefox, FirefoxProfile, FirefoxOptions
 from selenium.webdriver.support.ui import Select
-
-pp = pprint.PrettyPrinter(indent=4)
 
 regions = [
     "Alabama",
@@ -127,34 +124,6 @@ def get_table_by_headers(headers):
         table = trs1[0].find_element_by_xpath(".//ancestor::table")
         new_table_data = get_table_data_from_element(table, trs1[0], headers)
         success = append_unique_rows(table_data, new_table_data)
-
-    return table_data
-
-def get_table_data(region_info, headers):
-    table_data = []
-
-    the_iframe = None
-    iframe_validation_selector = get_element(region_info, "settings", "iframe", "table_selector")
-    if iframe_validation_selector:
-        print("table iframe selector")
-        iframe_map = get_iframe_map(iframe_validation_selector)
-
-        def add_table_data(iframe):
-            print("running add_table_data for")
-            print(iframe.id)
-            browser.switch_to.frame(iframe)
-
-            new_table_data = get_table_by_headers(headers)
-            any_appended = append_unique_rows(table_data, new_table_data)
-
-            return True
-
-        run_on_each_iframe(iframe_map, add_table_data)
-        browser.switch_to.default_content()
-
-
-    new_table_data = get_table_by_headers(headers)
-    any_appended = append_unique_rows(table_data, new_table_data)
 
     return table_data
 
@@ -291,20 +260,17 @@ def get_historic_death_row_data():
 def valid_html_doc(elem):
     return "<html><head><title></title></head><body>" + elem + "</body></html>"
 
-def get_demographic_info():
-    print("gdi")
+def get_state_demographic_data():
     data = {}
 
     demo_url = "https://www.kff.org/other/state-indicator/distribution-by-raceethnicity/?dataView=1&currentTimeframe=0&sortModel=%7B%22colId%22:%22Location%22,%22sort%22:%22asc%22%7D"
 
     if is_crawlable(demo_url):
-        print("ic")
         browser.get(demo_url)
 
         time.sleep(10)
 
         accept_cookies_button = browser.find_element_by_id("hs-eu-confirmation-button")
-        print(accept_cookies_button)
         if accept_cookies_button:
             accept_cookies_button.click()
 
@@ -315,7 +281,6 @@ def get_demographic_info():
         year_select = Select(year_select_elem)
         while len(years) > 0:
             year = years.pop(0)
-            print(year)
 
             year_select.select_by_visible_text(year)
             time.sleep(15)
@@ -389,7 +354,7 @@ def get_current_death_row_data():
 
     return data
 
-def get_us_demographics_over_time():
+def get_us_demographic_data():
     data = {}
 
     source_url = "https://en.wikipedia.org/wiki/Historical_racial_and_ethnic_demographics_of_the_United_States"
@@ -430,17 +395,19 @@ def get_us_demographics_over_time():
                                             if pd.notna(row[col]):
                                                 data[race][col] = float(row[col].replace("%", ""))
 
-                            break
+                            # Was the table of percentages so can stop
+                            return data
 
     return data
 
 
 def main():
-    us_demographics_over_time = get_us_demographics_over_time()
+    us_demographics_over_time = get_us_demographic_data()
     with open("us_demographics_over_time.json", "w") as outfile:
         json.dump(us_demographics_over_time, outfile, indent=4)
 
-    demographics = get_demographic_info()
+
+    demographics = get_state_demographic_data()
     with open("demographics.json", "w") as outfile:
         json.dump(demographics, outfile, indent=4)
 

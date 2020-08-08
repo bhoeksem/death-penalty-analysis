@@ -2,8 +2,6 @@ import random
 import json
 
 
-#random.seed(123)
-
 def cumulative_from_denominators(picks, denominators, sum_denominators):
     cumulative_prob_list = []
 
@@ -32,9 +30,7 @@ def run_simulation(num_picks, sum_denominators, denominators):
 def run_simulations(pop_year, pop, sample_demographics):
     num_sims = 100000
 
-    print(sample_demographics)
     num_picks = sum(list(sample_demographics.values()))
-    print(num_picks)
 
     group_order = []
     denominators = []
@@ -47,8 +43,6 @@ def run_simulations(pop_year, pop, sample_demographics):
 
     sum_denominators = sum(denominators)
 
-    print(group_order)
-    print(denominators)
 
     sim_picks = []
     for i in range(num_sims):
@@ -65,16 +59,12 @@ def run_simulations(pop_year, pop, sample_demographics):
                 num_as_good_as_reality[i] += 1
 
 
-    print(num_as_bad_as_reality)
-    print(num_as_good_as_reality)
-
     chance_this_bad_or_worse = {}
     for i in range(len(group_order)):
         # Sames are counted twice
         percentile = num_as_bad_as_reality[i] / (num_as_bad_as_reality[i] + num_as_good_as_reality[i])
         chance_this_bad_or_worse[group_order[i]] = percentile
 
-    print(chance_this_bad_or_worse)
 
     return chance_this_bad_or_worse
 
@@ -149,102 +139,16 @@ with open('executions.json') as f:
         executions[state][race] += 1
 
 
-#print(inmates)
-#print(executions)
-#print(year2state2pop)
-
-run_simulations(2008, state2pop["Kentucky"], inmates["Kentucky"])
-
-"""
 year2state2chances = {}
 for pop_year, state2pop in year2state2pop.items():
-    print(pop_year)
     year2state2chances[pop_year] = {}
     for state in state2pop:
         year2state2chances[pop_year][state] = {}
-        print()
-        print(state)
         if state in inmates:
             year2state2chances[pop_year][state]['inmates'] = run_simulations(pop_year, state2pop[state], inmates[state])
         if state in executions:
             year2state2chances[pop_year][state]['executions'] = run_simulations(pop_year, state2pop[state], executions[state])
     
 
-# TODO
 with open("year2state2chances.json", 'w') as f:
     json.dump(year2state2chances, f)
-"""
-
-
-
-
-"""
-
-# Alabama
-buckets = {
-        'white': 3115600.0,
-        'black': 1257300.0,
-        'hispanic': 204800.0,
-        'other': 92100.0,
-        'asian': 63800.0,
-        'aian': 19000.0
-    }
-num_picks = 175
-target_bucket = 'black'
-threshold = 89
-
-"""
-buckets = {
-        'white': 5358000.0,
-        'black': 3158000.0,
-        'hispanic': 994300.0,
-        'other': 265000.0,
-        'asian': 421200.0,
-        'aian': 16300.0
-    }
-num_picks = 76
-target_bucket = 'black'
-threshold = 28
-"""
-
-sum_buckets = 0
-for bucket in buckets:
-    sum_buckets += buckets[bucket]
-
-bucket_list = []
-cumulative_prob_list = []
-
-cumulative_prob = 0
-for bucket in buckets:
-    cumulative_prob += (buckets[bucket] / sum_buckets)
-
-    bucket_list.append(bucket)
-    cumulative_prob_list.append(cumulative_prob)
-
-print(bucket_list)
-print(cumulative_prob_list)
-
-num_crazier = 0
-num_sims = 1000000
-
-for k in range(num_sims):
-    if k > 0 and k % 10000 == 0:
-        print((1.0 * num_crazier) / k)
-    picks = {}
-    for i in range(num_picks):
-        prob = random.random()
-        for j in range(len(bucket_list)):
-            if prob <= cumulative_prob_list[j]:
-                bucket = bucket_list[j]
-                if bucket not in picks:
-                    picks[bucket] = 0
-                picks[bucket] += 1
-                break
-    if picks[target_bucket] >= threshold:
-        num_crazier += 1
-
-
-print(num_crazier)
-
-
-"""
