@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import pandas as pd
 import json
 import math
@@ -435,5 +437,7 @@ try:
     browser.implicitly_wait(15)
 
     main()
+except Exception as e:
+    print(e)
 finally:
     browser.quit()
