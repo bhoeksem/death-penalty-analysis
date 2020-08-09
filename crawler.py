@@ -295,6 +295,7 @@ def get_state_demographic_data():
             time.sleep(10)
 
             expected_header = ["Location","White","Black","Hispanic","American Indian/Alaska Native","Asian","Native Hawaiian/Other Pacific Islander","Two Or More Races","Total"]
+            non_white_groups = ['Black', 'Hispanic', 'American Indian/Alaska Native', 'Asian', 'Native Hawaiian/Other Pacific Islander']
             dg_filename = "raw_data.csv"
             if os.path.isfile(dg_filename):
                 with open(dg_filename, 'r') as infile:
@@ -327,6 +328,15 @@ def get_state_demographic_data():
                                 data[year].append(row_dict)
 
                 os.remove("raw_data.csv")
+
+                for state in data[year]:
+                    non_white_total = 0
+                    for group in non_white_groups:
+                        non_white_total += float(state[group])
+
+                    for group in non_white_groups:
+                        non_white_share = float(state[group]) / non_white_total
+                        state[group] = round(float(state[group]) + (non_white_share * float(state['Two Or More Races'])))
 
     return data
 
@@ -404,14 +414,14 @@ def get_us_demographic_data():
 
 
 def main():
-    us_demographics_over_time = get_us_demographic_data()
-    with open("us_demographics_over_time.json", "w") as outfile:
-        json.dump(us_demographics_over_time, outfile, indent=4)
-
-
     demographics = get_state_demographic_data()
     with open("demographics.json", "w") as outfile:
         json.dump(demographics, outfile, indent=4)
+
+
+    us_demographics_over_time = get_us_demographic_data()
+    with open("us_demographics_over_time.json", "w") as outfile:
+        json.dump(us_demographics_over_time, outfile, indent=4)
 
 
     inmates = get_current_death_row_data()

@@ -89,7 +89,6 @@ key_consolidation = {
         'Unknown': 'other',
 
         # Throw out
-        'Two Or More Races': '', # NOTE throwing out for now because I don't know what's most fair to do with it
         'Location': '',
         'State': '',
         'Total': '',
