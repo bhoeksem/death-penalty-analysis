@@ -89,6 +89,7 @@ key_consolidation = {
         'Unknown': 'other',
 
         # Throw out
+        'Two Or More Races': '', # NOTE: crawler should have distributed this to non-white groups
         'Location': '',
         'State': '',
         'Total': '',
